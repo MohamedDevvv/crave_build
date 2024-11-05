@@ -64,7 +64,7 @@ jobs:
     
     steps:
     
-    - name: Build dir
+    - name: Initialize build directory
       run: |
         build_dir=$(crave clone list --json | jq -r '.clones[]."Cloned At"')
         echo "BUILD_DIR=$build_dir" >> $GITHUB_ENV

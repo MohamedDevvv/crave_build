@@ -69,7 +69,7 @@ jobs:
 
     steps:
 
-    - name: Build dir
+    - name: Initialize build directory
       run: |
         build_dir=$(crave clone list --json | jq -r '.clones[]."Cloned At"')
         echo "BUILD_DIR=$build_dir" >> $GITHUB_ENV
@@ -79,14 +79,14 @@ jobs:
       run: |
         cd ${{ env.BUILD_DIR }}
 
-            rm -rf *.zip *sum out compiled
+            rm -rf *.zip *sum *.img compiled
 
-            crave pull 'out/target/product/${{ github.event.inputs.DEVICE_CODENAME }}/*.zip' \
-            'out/target/product/${{ github.event.inputs.DEVICE_CODENAME }}/recovery.img' \
-            'out/target/product/${{ github.event.inputs.DEVICE_CODENAME }}/*.sha256sum' \
-            'out/target/product/${{ github.event.inputs.DEVICE_CODENAME }}/*.md5sum' \
-            'out/target/product/${{ github.event.inputs.DEVICE_CODENAME }}/boot.img' \
-            'out/target/product/${{ github.event.inputs.DEVICE_CODENAME }}/vendor_boot.img'
+            crave pull 'out/target/product/*/*.zip' \
+            'out/target/product/*/recovery.img' \
+            'out/target/product/*/*.sha256sum' \
+            'out/target/product/*/*.md5sum' \
+            'out/target/product/*/boot.img' \
+            'out/target/product/*/vendor_boot.img'
 
             rm -f *-ota-*.zip *-eng*.zip lineage*ota.zip aosp*ota.zip statix*ota.zip
             
@@ -94,15 +94,8 @@ jobs:
             
             file_name=$(find . -maxdepth 1 -name '*.zip' | sed 's|^\./||')
 
-            mv -f "$file_name" "${{ env.BUILD_DIR }}/compiled/" || true
-            mv -f $file_name.sha256sum "${{ env.BUILD_DIR }}/compiled/" 2>/dev/null || true
-            mv -f $file_name.md5sum "${{ env.BUILD_DIR }}/compiled/" 2>/dev/null || true
-            mv -f "out/target/product/${{ github.event.inputs.DEVICE_CODENAME }}/recovery.img" "${{ env.BUILD_DIR }}/compiled/" || true
-            mv -f "out/target/product/${{ github.event.inputs.DEVICE_CODENAME }}/boot.img" "${{ env.BUILD_DIR }}/compiled/" || true
-            mv -f "out/target/product/${{ github.event.inputs.DEVICE_CODENAME }}/vendor_boot.img" "${{ env.BUILD_DIR }}/compiled/" 2>/dev/null || true
+            mv -f *.zip *.sha256sum *.md5sum *.img compiled/ || true
             
-            rm -rf out
-
     - name: Display files information
       run: |
         cd "${{ env.BUILD_DIR }}/compiled"
